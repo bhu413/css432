@@ -1,0 +1,15 @@
+nbufs * bufsize = 15 * 100
+Test 1: data-sending time = 222144 usec, round-trip time = 222259 usec, #reads = 4843
+Test 2: data-sending time = 38150 usec, round-trip time = 40900 usec, #reads = 52
+Test 3: data-sending time = 47329 usec, round-trip time = 51214 usec, #reads = 65
+
+nbufs * bufsize = 30 * 50
+Test 1: data-sending time = 405401 usec, round-trip time = 405589 usec, #reads = 7614
+Test 2: data-sending time = 38814 usec, round-trip time = 40849 usec, #reads = 69
+Test 3: data-sending time = 34392 usec, round-trip time = 36922 usec, #reads = 44
+
+nbufs * bufsize = 60 * 25
+Test 1: data-sending time = 791980 usec, round-trip time = 792173 usec, #reads = 13633
+Test 2: data-sending time = 45258 usec, round-trip time = 45709 usec, #reads = 86
+Test 3: data-sending time = 39573 usec, round-trip time = 42886 usec, #reads = 70
+
