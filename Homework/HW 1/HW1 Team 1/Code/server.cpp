@@ -27,7 +27,7 @@ int newSd;
 *   getStats
 *This method gets statistics for the RTT and data-sending time
 *
-*@param *data
+*@param *data (socket description)
 *@retun void
 */
 void *getStats(void *data) {
