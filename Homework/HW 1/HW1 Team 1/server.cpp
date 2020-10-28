@@ -34,14 +34,15 @@ void *getStats(void *data) {
     struct timeval start;
     struct timeval end;
 
-    gettimeofday(&start, nullptr);
+    gettimeofday(&start, nullptr); //start timer
 
-    int count = 0;
+    int count = 0; 
     for(int i = 0; i < repetition; i++){
+        //Repeat reading data from client
         for(int nRead = 0;(nRead += read(newSd, databuf, BUFSIZE - nRead)) < BUFSIZE; ++count);
     }
     
-    gettimeofday(&end, nullptr);
+    gettimeofday(&end, nullptr); //end timer
     write(newSd, &count, sizeof(count));
 
     long roundTrip = ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec);
@@ -70,26 +71,26 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    //given in assignment specifications
     sockaddr_in acceptSockAddr;
     bzero( (char*)&acceptSockAddr, sizeof( acceptSockAddr ) );
     acceptSockAddr.sin_family      = AF_INET; // Address Family Internet
     acceptSockAddr.sin_addr.s_addr = htonl( INADDR_ANY );
     acceptSockAddr.sin_port        = htons( port );
 
-    serverSd = socket( AF_INET, SOCK_STREAM, 0 );
+    serverSd = socket( AF_INET, SOCK_STREAM, 0 ); //open socket with Address Family Internet
     
     const int on = 1;
     setsockopt( serverSd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, 
                 sizeof( int ) );
 
+    //bind socket to its local address
     int bound = bind( serverSd, ( sockaddr* )&acceptSockAddr, sizeof( acceptSockAddr ) );
     if (bound < 0) {
         cout << "counld not bind socket to ip address" << endl;
         return -1;
     }
 
-    listen( serverSd, MAX_CONNECTIONS );
+    listen( serverSd, MAX_CONNECTIONS ); //listen up to 10 client requests at a time
 
     //looping forever to create multiple threads for multiple connections
     while(true){
