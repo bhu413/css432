@@ -23,6 +23,11 @@ int serverSd;
 int newSd;
 
 
+/**
+*   getStats
+*@param *data
+*@retun void
+*/
 void *getStats(void *data) {
     char databuf[BUFSIZE];
 
@@ -55,16 +60,17 @@ int main(int argc, char *argv[]) {
     int port = stoi(argv[1]);  // the last 4 digits of your student id
     repetition = stoi(argv[2]);
 
-    if (port < 1024 || port > 65535) {
+    if (port < 1024 || port > 65535) { //Makes sure that the port is within range
         cout << "port must be between 4000 and 6000" << endl;
         return -1;
     }
 
-    if (repetition < 0) {
+    if (repetition < 0) { //Ensure that repition input is valid
         cout << "repetition must be a positive number" << endl;
         return -1;
     }
 
+    //given in assignment specifications
     sockaddr_in acceptSockAddr;
     bzero( (char*)&acceptSockAddr, sizeof( acceptSockAddr ) );
     acceptSockAddr.sin_family      = AF_INET; // Address Family Internet
