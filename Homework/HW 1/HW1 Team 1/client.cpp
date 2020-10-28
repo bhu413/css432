@@ -30,27 +30,27 @@ int main(int argc, char *argv[]) {
     const char *serverIP = argv[5];
     int type = atoi(argv[6]);
 
-    if (nbufs * bufsize != 1500) {
+    if (nbufs * bufsize != 1500) { //check valid nbuf*bufsize
         cout << "nbufs * bufsize must equal 1500" << endl;
         return -1;
     }
 
-    if (port < 1024 || port > 65535) {
+    if (port < 1024 || port > 65535) { //check valid port number input
         cout << "port must be between 4000 and 6000" << endl;
         return -1;
     }
 
-    if (type < 1 || type > 3) {
+    if (type < 1 || type > 3) { //check validity of type
         cout << "type must be 1, 2, or 3" << endl;
         return -1;
     }
 
-    if (repetition < 0) {
+    if (repetition < 0) { //check valid repition input
         cout << "repetition must be a positive number" << endl;
         return -1;
     }
 
-    struct hostent* host = gethostbyname(serverIP);
+    struct hostent* host = gethostbyname(serverIP); //takes in serverIP address as argument
     if (host == nullptr) {
         cout << "could not find host" << endl;
         return -1;
@@ -73,9 +73,9 @@ int main(int argc, char *argv[]) {
 
     //try to connect to server
     int connected = connect( clientSd, ( sockaddr* )&sendSockAddr, sizeof( sendSockAddr ) );
-    if (connected < 0) {
+    if (connected < 0) { //if failed
         cout << "connection failed" << endl;
-        close(clientSd);
+        close(clientSd); //close socket
         return -1;
     }
 
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     struct timeval end;
     struct timeval lap;
 
-    gettimeofday(&start, nullptr);
+    gettimeofday(&start, nullptr); //start timer
 
     //writing data with repetition
     for (int i = 0; i < repetition; i++) {
@@ -107,22 +107,23 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    gettimeofday(&lap, nullptr);
+    gettimeofday(&lap, nullptr); //lap timer
 
     int reads;
     read(clientSd, &reads, sizeof(reads));
 
-    gettimeofday(&end, nullptr);
+    gettimeofday(&end, nullptr); //stop timer
 
-    long sendTime = ((lap.tv_sec - start.tv_sec) * 1000000) + (lap.tv_usec - start.tv_usec);
-    long roundTrip = ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec);
+    long sendTime = ((lap.tv_sec - start.tv_sec) * 1000000) + (lap.tv_usec - start.tv_usec); //Calculate data-sending time
+    long roundTrip = ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec); //Calculate RTT
     
+    //Print stats
     cout << "Test " << type << ": ";
     cout << "data-sending time = " << sendTime << " usec, ";
     cout << "round-trip time = " << roundTrip << " usec, ";
     cout << "#reads = " << reads << endl;
 
     printf("%s\n",databuf ); 
-    close(clientSd);
+    close(clientSd); //Close socket
     return 0;
 }
