@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (port < 1024 || port > 65535) { //check valid port number input
-        cout << "port must be between 4000 and 6000" << endl;
+        cout << "port must be between 1024 and 65535" << endl;
         return -1;
     }
 

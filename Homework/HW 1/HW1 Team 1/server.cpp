@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     repetition = stoi(argv[2]);
 
     if (port < 1024 || port > 65535) { //Makes sure that the port is within range
-        cout << "port must be between 4000 and 6000" << endl;
+        cout << "port must be between 1024 and 65535" << endl;
         return -1;
     }
 
