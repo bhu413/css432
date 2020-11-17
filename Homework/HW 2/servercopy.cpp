@@ -25,46 +25,36 @@ struct thread_data{
 string prepareResponseData(string &filePath){
 
     string fileContent = "";
-    string statusCode;
     int pathLength = filePath.length();
     if(pathLength >= 15){
         //handle attempts at accessing secret file by checking last 15 (length of file string)
         if(filePath.substr(pathLength - 15, pathLength) == SECRET_FILE){
-            fileContent = "HTTP/1.1 401 Unauthorized\r\n";
-            statusCode = "401"; //*****Should this be UNAUTHORIZED_RESPONSE?****
+            fileContent = "HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n";
         }
     }
     else if(filePath.substr(0, 2) == ".."){
         //handles attempts at accessing files outside of current server directory
-        fileContent = "HTTP/1.1 403 Forbidden\r\n";
-        statusCode = "403"; //*****Should this be FORBIDDEN_RESPONSE?****
+        fileContent = "HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n";
     }
     else{ //handles valid responses
         filePath.insert(0,".");
-        FILE *file = fopen(filePath.c_str(), "r");
-        if(file == nullptr){
+        ifstream file (filePath);
+        if (!file.is_open()) {
             cout << "ERROR: File does not exist or permission denied" << endl;
-            fileContent = "HTTP/1.1 404 Not Found\r\n";
-            statusCode = "404"; //*****Should this be NOT_FOUND_RESPONSE?****
+            fileContent = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
         }
         else{
-            while (!feof(file)){
-                char fileData = fgetc(file);
-
-                if(fileData != '\n' && fileData != '\r' && fileData > 0){
-                    fileContent += fileData;
-                }
-
-                if(fileData == '\n')
-                    fileContent += '\n';
-
-                if(fileData == '\r')
-                    fileContent += '\r';
-
+            
+            string line;
+            string filestring = "";
+            while (getline(file, line)){
+                filestring += line;
             }
-
-            statusCode = "HTTP/1.1 200 OK\r\n";
-            fclose(file);
+            file.close();
+            fileContent = "HTTP/1.1 200 OK\r\nContent-Length: " + to_string(filestring.length()) + "\r\n\r\n";
+            
+            fileContent += filestring;
+            
         }
     }
     
@@ -93,8 +83,10 @@ string getHeader(int socket) {
 }
 
 string getFilePathFromHeader(string header) {
+    string path;
     int indexOfHTTP = header.find(" HTTP/1.1");
-    return header.substr(4, header.length() - indexOfHTTP);
+    path = header.substr(4, indexOfHTTP - 4);
+    return path;
 }
 
 bool checkIfGET(string header) {
@@ -108,22 +100,20 @@ bool checkIfGET(string header) {
 void *handleGETRequest(void* dataIn){
     struct thread_data *data;
     data = (struct thread_data *) dataIn;
-    socket = data->socket;
-    string header = getHeader(socket);
+    string header = getHeader(data->socket);
+    string filepath = getFilePathFromHeader(header);
     string message = "";
     if (checkIfGET(header)) {
-        message = prepareResponseData(getFilePathFromHeader(header));
+        message = prepareResponseData(filepath);
     } else {
-        message = "HTTP/1.1 400 Bad Request\r\n";
+        message = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
         //statusCode = "400"; //*****Should this be BAD_REQUEST_RESPONSE?****
     }
-    int sent = send(socket, message.c_str(), message.length(), 0);
+    int sent = send(data->socket, message.c_str(), message.length(), 0);
     if (sent <= 0) {
         cout << "could not send message" << endl;
-        //return -1;
-    } else {
-        //return 0;
     }
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -157,7 +147,7 @@ int main(int argc, char *argv[]) {
     //bind socket to its local address
     int bound = bind( serverSd, ( sockaddr* )&acceptSockAddr, sizeof( acceptSockAddr ) );
     if (bound < 0) {
-        cout << "counld not bind socket to ip address" << endl;
+        cout << "could not bind socket to ip address" << endl;
         return -1;
     }
 
@@ -169,8 +159,9 @@ int main(int argc, char *argv[]) {
         socklen_t newSockAddrSize = sizeof( newSockAddr );
         newSd = accept( serverSd, ( sockaddr *)&newSockAddr, &newSockAddrSize );
         pthread_t thread;
-        thread_data.socket = newSd;
-        pthread_create(&thread, NULL, handleGETRequest, (void*) &thread_data);
+        struct thread_data data;
+        data.socket = newSd;
+        pthread_create(&thread, NULL, handleGETRequest, (void*) &data);
     }
     return 0;
 }
