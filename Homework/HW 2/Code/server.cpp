@@ -120,6 +120,7 @@ void *handleGETRequest(void* dataIn){
     }
 
     //send message
+    cout << "Sending " + filepath << endl;
     int sent = send(data->socket, message.c_str(), message.length(), 0);
     if (sent <= 0) {
         cout << "could not send message" << endl;
@@ -166,7 +167,8 @@ int main(int argc, char *argv[]) {
     listen( serverSd, MAX_CONNECTIONS ); //listen up to 10 client requests at a time
 
     //looping forever to create multiple threads for multiple connections
-    while(true){
+    cout << "Server is running" << endl;
+    while(true) {
         sockaddr_in newSockAddr;
         socklen_t newSockAddrSize = sizeof( newSockAddr );
         newSd = accept( serverSd, ( sockaddr *)&newSockAddr, &newSockAddrSize );

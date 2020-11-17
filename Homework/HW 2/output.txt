@@ -1,0 +1,29 @@
+
+testing access to real server
+Server returned error code 301
+
+<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
+<TITLE>301 Moved</TITLE></HEAD><BODY>
+<H1>301 Moved</H1>
+The document has moved
+<A HREF="http://www.google.com/index.html">here</A>.
+</BODY></HTML>
+
+
+testing accessing file from own server
+<!DOCTYPE html><h1>This is a test page</h1>
+
+testing request unauthorized file
+Server returned error code 401
+
+
+
+testing request forbidden file
+
+
+testing requesting non-existent file
+Server returned error code 404
+
+<!DOCTYPE html><h1>The file you requested could not be found</h1><h2>ERROR: 404 FILE NOT FOUND</h2>
+
+testing malformed request
