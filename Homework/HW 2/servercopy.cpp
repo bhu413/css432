@@ -7,11 +7,6 @@
 
 using namespace std;
 
-const string THREAD_MESSAGE = "New thread of count: ";
-const int CONNECTION_REQUEST_SIZE = 10;
-const string OK_RESPONSE = "HTTP/1.1 200 OK\r\n";
-const string UNAUTHORIZED_RESPONSE = "HTTP/1.1 401 Unauthorized\r\n";
-const string FORBIDDEN_RESPONSE = "HTTP/1.1 403 Forbidden\r\n";
 const string SECRET_FILE = "SecretFile.html";
 const int MAX_CONNECTIONS = 10;
 int serverSd;
@@ -41,10 +36,16 @@ string prepareResponseData(string &filePath){
         ifstream file (filePath);
         if (!file.is_open()) {
             cout << "ERROR: File does not exist or permission denied" << endl;
-            fileContent = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
-        }
-        else{
-            
+            ifstream notFoundfile ("notfound.html");
+            string line;
+            string filestring = "";
+            while (getline(notFoundfile, line)){
+                filestring += line;
+            }
+            file.close();
+            fileContent = "HTTP/1.1 404 Not Found\r\nContent-Length: " + to_string(filestring.length()) + "\r\n\r\n";
+            fileContent += filestring;
+        } else{
             string line;
             string filestring = "";
             while (getline(file, line)){
@@ -123,6 +124,7 @@ void *handleGETRequest(void* dataIn){
     if (sent <= 0) {
         cout << "could not send message" << endl;
     }
+    close (data->socket);
     return 0;
 }
 
