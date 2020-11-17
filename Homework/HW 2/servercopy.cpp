@@ -98,17 +98,27 @@ bool checkIfGET(string header) {
 }
 
 void *handleGETRequest(void* dataIn){
+    //get socket
     struct thread_data *data;
     data = (struct thread_data *) dataIn;
+
+    //get request header
     string header = getHeader(data->socket);
+
+    //get filepath from header
     string filepath = getFilePathFromHeader(header);
+
     string message = "";
+    //check if it is GET request
     if (checkIfGET(header)) {
+        //create message
         message = prepareResponseData(filepath);
     } else {
         message = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
         //statusCode = "400"; //*****Should this be BAD_REQUEST_RESPONSE?****
     }
+
+    //send message
     int sent = send(data->socket, message.c_str(), message.length(), 0);
     if (sent <= 0) {
         cout << "could not send message" << endl;
