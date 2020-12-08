@@ -13,6 +13,7 @@ public class ClientHandler implements Runnable {
 	private PrintWriter out;
 	private ArrayList<ClientHandler> clients;
 	private String name = "";
+	public boolean inGame = false;
 
 	public ClientHandler(Socket clientSocket, ArrayList<ClientHandler> clients) throws IOException {
 		this.client = clientSocket;
@@ -41,8 +42,15 @@ public class ClientHandler implements Runnable {
 						outToAll(request.substring(firstSpace + 1));
 
 					}
+				} else if (request.equals("/unregister")) {
+					removeClient(this);
+				} else if (request.startsWith("/users")) {
+	                listUsers();
+	                
 				}
-
+				else if (request.startsWith("/challenge")) {
+					//TBD
+				}
 			}
 		} catch (IOException e) {
 			System.err.println("IO exception in client handler");
@@ -62,6 +70,25 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	private void removeClient(ClientHandler aClient) {
+		int index = 0;
+		for (ClientHandler current : clients) {
+			if (current.equals(aClient)) {
+				clients.remove(index);
+			} else {
+				index++;
+			}
+		}
+	}
+	
+	private void listUsers() {
+        out.println("Current Users:");
+        for (ClientHandler aClient : clients) {
+            if (aClient.getName() != this.name) {
+                out.println(aClient.getName());
+            }
+        }
+    }
 	public String getName() {
 		return name;
 	}
