@@ -36,6 +36,10 @@ public class ClientHandler implements Runnable {
 			}
 			while (true) {
 				String request = in.readLine();
+				if (request == null) {
+					removeClient(this);
+					break;
+				}
 				if (request.startsWith("/all")) {
 					int firstSpace = request.indexOf(' ');
 					if (firstSpace != -1) {
@@ -68,15 +72,10 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	
+	
 	private void removeClient(ClientHandler aClient) {
-		int index = 0;
-		for (ClientHandler current : clients) {
-			if (current.equals(aClient)) {
-				clients.remove(index);
-			} else {
-				index++;
-			}
-		}
+				clients.remove(aClient);
 	}
 	
 	private void listUsers() {
