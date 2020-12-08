@@ -50,8 +50,23 @@ public class ClientHandler implements Runnable {
 				} else if (request.startsWith("/users")) {
 	                listUsers();	                
 				}
+				
+				//find if client exists ---exists(Client) return boolean----
+				//if they exist, check if they are in a game
+				//if not in a game and exists, send challenge message ---challenge(Client) return void----
+				//challenged player responds with answer ---challengeNotification(Client) return void----
+				//display result
+				//if challenge accepted
+				//take in player choices
+				//run game logic
+				//display results to both players
+				//reset inGame variable so other players can challenge
 				else if (request.startsWith("/challenge")) {
-					//TBD
+					int firstSpace = request.indexOf(' ');
+					String otherPlayer = request.substring(firstSpace + 1);
+					if (firstSpace != -1 && exists(otherPlayer) && !getClient(otherPlayer).inGame) { //run game logic to whoever was challenged
+						
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -86,7 +101,41 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+	
+	private boolean challenge(ClientHandler otherPlayer) throws IOException {
+		return otherPlayer.challengeNotification(this.name);
+	}
+	
+	private boolean challengeNotification(String user) throws IOException {
+		String response = "";
+		this.out.println(user + " has sent a challenge.");
+		this.out.println("Do you accept? y/n");
+		response = in.readLine();
+		
+		return response.equalsIgnoreCase("y");
+	}
+	
+	private boolean exists(String user) {
+		boolean doesExist = false;
+		for (ClientHandler aClient : clients) {
+            if (aClient.getName().equals(user)) 
+            	doesExist = true;
+        }
+		if(!doesExist) out.println(user + " does not exist in the server.");
+		return doesExist;
+	}
+	
 	public String getName() {
 		return name;
+	}
+	
+	public ClientHandler getClient(String user) {
+		if(exists(user)) {
+			for (ClientHandler aClient : clients) {
+	            if (aClient.getName().equals(user)) 
+	            	return aClient;
+	        }
+		}
+		return null;
 	}
 }
