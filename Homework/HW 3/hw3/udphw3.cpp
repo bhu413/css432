@@ -1,3 +1,21 @@
+/*
+TJBB - Temesgen Habte, James Kim, Brandon Hu, Bryant Nguyen
+
+HW3:
+This assignment showcases differnt algorithms for sending data across a network.
+
+Unreliable: The client just sends all data without checking for acks
+
+Stop and wait: The client sends each packet and then waits for the ack before sending the next one.
+This can also be seen as a sliding window algorithm with a window size of 1.
+
+Sliding window: The client sends packets without receiving ack until the window fills up.
+Then as the acks are received from the server, the window "slides" over and more packets are sent.
+If a time-out occurs. We go back to the last received ack and start over from there.
+
+*/
+
+
 #include "UdpSocket.h"
 #include "Timer.h"
 
@@ -88,6 +106,7 @@ int clientSlidingWindow( UdpSocket &sock, const int max, int message[], int wind
                 //try to see if there is data
                 if (sock.pollRecvFrom() > 0) {
                     sock.recvFrom((char *) message, MSGSIZE);
+                    cerr << message[0] << endl;
                     if (message[0] == ack) {
                         ack++;
                         numUnack--;
@@ -111,13 +130,19 @@ int clientSlidingWindow( UdpSocket &sock, const int max, int message[], int wind
 void serverEarlyRetrans( UdpSocket &sock, const int max, int message[], int windowSize ) {
     int sequence = 0;
     while (sequence < max) {
-        while (sock.pollRecvFrom() < 1) {}
-        sock.recvFrom((char *) message, MSGSIZE);
-        //always ack sequence
-        sock.ackTo((char *) &sequence, sizeof(sequence));
-        //if it is the right packet, increment window
-        if (message[0] == sequence) {
-            sequence++;
+        bool keeprunning = true;
+        while (keeprunning) {
+            if (sock.pollRecvFrom() > 0) {
+                sock.recvFrom((char *) message, MSGSIZE);
+                cerr << message[0] << endl;
+                sock.ackTo((char *) &sequence, sizeof(sequence));
+                //if it is the right packet, increment window
+                if (message[0] == sequence) {
+                    sequence++;
+                    //since we can move on to the next sequence
+                    keeprunning = false;
+                }
+            }
         }
     }
 }

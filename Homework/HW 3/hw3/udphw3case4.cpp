@@ -1,3 +1,13 @@
+/*
+TJBB - Temesgen Habte, James Kim, Brandon Hu, Bryant Nguyen
+
+This file is pretty much the same as udphw3.cpp except for the ServerEarlyRetrans method.
+
+There is a random number generator to simulate percentages of dropped ack packets as required for case 4.
+
+*/
+
+
 #include "UdpSocket.h"
 #include "Timer.h"
 

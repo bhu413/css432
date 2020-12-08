@@ -1,3 +1,16 @@
+/*
+TJBB - Temesgen Habte, James Kim, Brandon Hu, Bryant Nguyen
+
+This file is pretty much the same as hw3.cpp.
+
+The only thing added is testcase 4 which is for an unreliable sliding window simulation
+
+The window size for testcase 4 is only 1 and 30. 
+
+Drop percentages from 0 to 10 are tested for each window size/
+
+*/
+
 #include <iostream>
 #include "UdpSocket.h"
 #include "Timer.h"
@@ -90,6 +103,7 @@ int main( int argc, char *argv[] ) {
     case 4:
         //only testing window size of 1 and of 30
         for (int windowSize = 1; windowSize <= MAXWIN; windowSize += 29) {
+            //testing 0-10% drops
             for (int drops = 0; drops <= 10; drops++) {
                 timer.start();
                 retransmits = clientSlidingWindow(sock, MAX, message, windowSize);
@@ -123,6 +137,7 @@ int main( int argc, char *argv[] ) {
     case 4:
         //only testing window size of 1 and of 30
         for (int windowSize = 1; windowSize <= MAXWIN; windowSize += 29) {
+            //testing 0-10% drops
             for (int drops = 0; drops <= 10; drops++) {
                 serverEarlyRetrans(sock, MAX, message, windowSize, drops);
             }

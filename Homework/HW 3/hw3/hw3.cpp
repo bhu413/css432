@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#define PORT 5895      // my UDP port
+#define PORT 5985      // my UDP port
 #define MAX 20000        // times of message transfer
 #define MAXWIN 30        // the maximum window size
 #define LOOP 10          // loop in test 4 and 5
