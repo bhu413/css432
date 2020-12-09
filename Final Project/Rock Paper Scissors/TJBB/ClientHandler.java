@@ -14,6 +14,7 @@ public class ClientHandler implements Runnable {
 	private ArrayList<ClientHandler> clients;
 	private String name = "";
 	public boolean inGame = false;
+	String[] answers = { "rock", "r", "paper", "p", "scissors", "s" };
 
 	public ClientHandler(Socket clientSocket, ArrayList<ClientHandler> clients) throws IOException {
 		this.client = clientSocket;
@@ -36,10 +37,6 @@ public class ClientHandler implements Runnable {
 			}
 			while (true) {
 				String request = in.readLine();
-				if (request == null) {
-					removeClient(this);
-					break;
-				}
 				if (request.startsWith("/all")) {
 					int firstSpace = request.indexOf(' ');
 					if (firstSpace != -1) {
@@ -51,21 +48,19 @@ public class ClientHandler implements Runnable {
 	                listUsers();	                
 				}
 				
-				//find if client exists ---exists(Client) return boolean----
-				//if they exist, check if they are in a game
-				//if not in a game and exists, send challenge message ---challenge(Client) return void----
-				//challenged player responds with answer ---challengeNotification(Client) return void----
-				//display result
-				//if challenge accepted
-				//take in player choices
-				//run game logic
-				//display results to both players
-				//reset inGame variable so other players can challenge
 				else if (request.startsWith("/challenge")) {
 					int firstSpace = request.indexOf(' ');
-					String otherPlayer = request.substring(firstSpace + 1);
-					if (firstSpace != -1 && exists(otherPlayer) && !getClient(otherPlayer).inGame) { //run game logic to whoever was challenged
-						
+					String otherPlayerId = request.substring(firstSpace + 1);
+					if (firstSpace != -1 && exists(otherPlayerId) && !getClient(otherPlayerId).inGame) { //run game logic to whoever was challenged
+						ClientHandler otherPlayer = getClient(otherPlayerId);
+						boolean challengeAccepted = this.challenge(otherPlayer);
+						System.out.println(challengeAccepted); //TEST
+						if(challengeAccepted) {
+							this.inGame = true;
+							player1Shoot(otherPlayer);
+						}else {
+							out.println(otherPlayerId + " does not want to play right now.");
+						}
 					}
 				}
 			}
@@ -87,10 +82,8 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	
-	
 	private void removeClient(ClientHandler aClient) {
-				clients.remove(aClient);
+		clients.remove(aClient);
 	}
 	
 	private void listUsers() {
@@ -102,6 +95,12 @@ public class ClientHandler implements Runnable {
         }
     }
 	
+	private void outToBoth(ClientHandler p1, ClientHandler p2, String message) {
+		p1.out.println(message);
+		p2.out.println(message);
+	}
+	
+//------------------------------Game Logic-----------------------------------	
 	private boolean challenge(ClientHandler otherPlayer) throws IOException {
 		return otherPlayer.challengeNotification(this.name);
 	}
@@ -112,9 +111,96 @@ public class ClientHandler implements Runnable {
 		this.out.println("Do you accept? y/n");
 		response = in.readLine();
 		
+		if(response.equalsIgnoreCase("y")) this.inGame = true;
+		
 		return response.equalsIgnoreCase("y");
 	}
 	
+	private void player1Shoot(ClientHandler otherPlayer) throws IOException {
+		out.println("Game Started!");
+		out.println("What is your choice? (rock, paper, or scissors)");
+		String p1Choice = in.readLine();
+		String p2Choice = otherPlayer.player2Shoot(this);
+
+		results(this, p1Choice, otherPlayer, p2Choice);
+		
+		this.inGame = false;
+		otherPlayer.inGame = false;
+	}
+	
+	private String player2Shoot(ClientHandler challenger) throws IOException {
+		out.println("Game Started!");
+		out.println("What is your choice? (rock, paper, or scissors)");
+		String p2Choice = in.readLine();
+		
+		return p2Choice;
+	}
+	
+	private void results(ClientHandler p1, String p1Choice, ClientHandler p2, String p2Choice) {
+		if (!isValid(p1Choice)) {
+			outToBoth(p1, p2, p1.name + ": Invalid move! Player 2 wins by default");
+		}
+		if (!isValid(p2Choice)) {
+			outToBoth(p1, p2, p2.name + ": Invalid move! Player 1 wins by default");
+		}
+
+		if (gamePlay(p1Choice, p2Choice) == 0) {
+			outToBoth(p1, p2, p1.name + " and " + p2.name + " both played " + p1Choice);
+			outToBoth(p1, p2, "Tie!\nGame Over");
+		} else if (gamePlay(p1Choice, p2Choice) == 1) {
+			outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
+			outToBoth(p1, p2, p1.name + " wins!\nGame Over");
+		}else {
+			outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
+			outToBoth(p1, p2, p2.name + " wins!\nGame Over");
+		}
+	}
+	
+	public boolean isValid(String choice) {
+		boolean valid = false;
+		int count = 0;
+		while (valid == false && count < answers.length) {
+			if (choice.equalsIgnoreCase(answers[count]))
+				valid = true;
+			count++;
+		}
+		return valid;
+	}
+
+	public int gamePlay(String p1Choice, String p2Choice) {
+		int winner = 0;
+		if (p1Choice.equalsIgnoreCase(answers[0]) || p1Choice.equalsIgnoreCase(answers[1])) {
+			if (p2Choice.equalsIgnoreCase(answers[2]) || p2Choice.equalsIgnoreCase(answers[3])) {
+				winner = 2;
+				return winner;
+			} else if (p2Choice.equalsIgnoreCase(answers[4]) || p2Choice.equalsIgnoreCase(answers[5])) {
+				winner = 1;
+				return winner;
+			}
+		} else if (p1Choice.equalsIgnoreCase(answers[2]) || p1Choice.equalsIgnoreCase(answers[3])) {
+			if (p2Choice.equalsIgnoreCase(answers[0]) || p2Choice.equalsIgnoreCase(answers[1])) {
+				winner = 1;
+				return winner;
+			} else if (p2Choice.equalsIgnoreCase(answers[4]) || p2Choice.equalsIgnoreCase(answers[5])) {
+				winner = 2;
+				return winner;
+			}
+		} else if (p1Choice.equalsIgnoreCase(answers[4]) || p1Choice.equalsIgnoreCase(answers[5])) {
+			if (p2Choice.equalsIgnoreCase(answers[2]) || p2Choice.equalsIgnoreCase(answers[3])) {
+				winner = 1;
+				return winner;
+			} else if (p2Choice.equalsIgnoreCase(answers[0]) || p2Choice.equalsIgnoreCase(answers[1])) {
+				winner = 2;
+				return winner;
+			}
+		} else {
+			winner = 0;
+			return winner;
+		}
+		return winner;
+	}
+//------------------------------End Game Logic-------------------------------
+
 	private boolean exists(String user) {
 		boolean doesExist = false;
 		for (ClientHandler aClient : clients) {
