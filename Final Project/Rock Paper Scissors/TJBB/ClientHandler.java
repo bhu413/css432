@@ -36,7 +36,11 @@ public class ClientHandler implements Runnable {
 				out.println("That's a great username " + name + "!");
 			}
 			while (true) {
-				String request = in.readLine();
+				String request = "";
+				if (in.ready()) {
+					request = in.readLine();
+				}
+				
 				if (request.startsWith("/all")) {
 					int firstSpace = request.indexOf(' ');
 					if (firstSpace != -1) {
@@ -44,7 +48,15 @@ public class ClientHandler implements Runnable {
 					}
 				} else if (request.equals("/unregister")) {
 					removeClient(this);
-				} else if (request.startsWith("/users")) {
+				}
+				else if (request.startsWith("/message")) {
+					int firstSpace = request.indexOf(' ');
+					int colon = request.indexOf(':');
+					if (firstSpace != -1) {
+						outToOther(request.substring(firstSpace + 1, colon), request.substring(colon + 1));
+					}        
+				}
+				else if (request.startsWith("/users")) {
 	                listUsers();	                
 				}
 				
@@ -53,14 +65,17 @@ public class ClientHandler implements Runnable {
 					String otherPlayerId = request.substring(firstSpace + 1);
 					if (firstSpace != -1 && exists(otherPlayerId) && !getClient(otherPlayerId).inGame) { //run game logic to whoever was challenged
 						ClientHandler otherPlayer = getClient(otherPlayerId);
+						outToBoth(this, otherPlayer, "you guys ready");
 						boolean challengeAccepted = this.challenge(otherPlayer);
-						System.out.println(challengeAccepted); //TEST
+						out.println(challengeAccepted); //TEST
 						if(challengeAccepted) {
 							this.inGame = true;
 							player1Shoot(otherPlayer);
 						}else {
 							out.println(otherPlayerId + " does not want to play right now.");
 						}
+					} else {
+						out.println(otherPlayerId + " does not exist or is in a game.");	
 					}
 				}
 			}
@@ -86,6 +101,8 @@ public class ClientHandler implements Runnable {
 		clients.remove(aClient);
 	}
 	
+	
+	
 	private void listUsers() {
         out.println("Current Users:");
         for (ClientHandler aClient : clients) {
@@ -98,6 +115,11 @@ public class ClientHandler implements Runnable {
 	private void outToBoth(ClientHandler p1, ClientHandler p2, String message) {
 		p1.out.println(message);
 		p2.out.println(message);
+	}
+	
+	private void outToOther(String user, String message) {
+		ClientHandler other = getClient(user);
+		other.out.println(this.name + ": " + message);
 	}
 	
 //------------------------------Game Logic-----------------------------------	
