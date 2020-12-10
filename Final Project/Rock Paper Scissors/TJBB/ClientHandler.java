@@ -27,8 +27,7 @@ public class ClientHandler implements Runnable {
 	@Override
 	public void run() {
 		try {
-			out.println(
-					"Please Register. What would you like your username to be? If you'd like a random name please type 'give me a name'");
+			//out.println("Please Register. What would you like your username to be? If you'd like a random name please type 'give me a name'");
 			name = in.readLine();
 			if (name.equalsIgnoreCase("give me a name")) {
 				name = Server.getRandomName();
@@ -49,6 +48,7 @@ public class ClientHandler implements Runnable {
 					}
 				} else if (request.equals("/unregister")) {
 					removeClient(this);
+					break;
 				}
 				else if (request.startsWith("/message")) {
 					int firstSpace = request.indexOf(' ');
@@ -115,7 +115,8 @@ public class ClientHandler implements Runnable {
         out.println("Current Users:");
         for (ClientHandler aClient : clients) {
             if (aClient.getName() != this.name) {
-                out.println(aClient.getName());
+				int inGameInt = inGame ? 1 : 0;
+				out.println(aClient.getName() + " " + inGameInt);
             }
         }
     }
