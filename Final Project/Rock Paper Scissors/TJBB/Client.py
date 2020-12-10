@@ -6,7 +6,7 @@ from tkinter.constants import BOTH
 import time
 
 window = tk.Tk()
-window.geometry("800x500")
+window.geometry("600x800")
 window.title("Rock Paper Scissors")
 window.configure(bg='#4c32a8')
 
@@ -23,71 +23,24 @@ def on_closing():
 window.protocol("WM_DELETE_WINDOW", on_closing)
 
 
-#btnConnect = tk.Button(window, text="Connect", command=lambda : connect())
-#btnConnect.grid(row = 0, column = 0, pady = 2)
-
-nameFrame = tk.Frame(window, bg='#4c32a8')
-
-nameLabel = tk.Label(nameFrame, text="Please enter a username", bg='#4c32a8', fg='#ffffff')
-nameLabel.grid(row=2, column=3, pady=10)
-entName = tk.Entry(nameFrame)
-entName.grid(row=3, column=3)
-btnConnect = tk.Button(nameFrame, text="Connect", command=lambda : connect())
-btnConnect.grid(row=4, column=3, pady=10)
-
-nameFrame.grid(row=1, column=3)
-
-
 
 chatFrame = tk.Frame(window, bg='#9752ff')
-chatDisplay = tk.Text(chatFrame, height=20, width=30)
+chatDisplay = tk.Text(chatFrame, height=40, width=40)
 chatDisplay.grid(row = 0, column = 1, pady = 2)
-chatInputBox = tk.Text(chatFrame, height=2, width=30)
+chatInputBox = tk.Text(chatFrame, height=2, width=40)
 chatInputBox.grid(row = 2, column = 1, pady = 2)
 chatInputBox.config(highlightbackground="grey", state="disabled")
 chatInputBox.bind("<Return>", (lambda event: get_chat_message(chatInputBox.get("1.0", tk.END))))
 
-usersFrame = tk.Frame(window, bg='#9752ff')
-btnUsers = tk.Button(chatFrame, text="Show Available Games", command=lambda : send_mssage_to_server("/users"))
-btnUsers.grid(row=0, column=3)
-userList = tk.Listbox(usersFrame, bg='#9752ff')
-
-
-def challenged():
-    print("challenged")
-
-def updateUsers(users):
-    usrArray = users.split("\n")
-    for i in range(1, len(usrArray)):
-        userList.insert(i, usrArray[i])
-        print(usrArray[i])
-    userList.grid(row=1, column=3)
-    
-
-def showInChatBox(message):
-    # display message from server on the chat window
-
-    # enable the display area and insert the text and then disable.
-    # why? Apparently, tkinter does not allow us insert into a disabled Text widget :(
-    texts = chatDisplay.get("1.0", tk.END).strip()
-    chatDisplay.config(state=tk.NORMAL)
-    if len(texts) < 1:
-        chatDisplay.insert(tk.END, message)
-    else:
-        chatDisplay.insert(tk.END, "\n\n"+ message)
-
-    chatDisplay.config(state=tk.DISABLED)
-    chatDisplay.see(tk.END)
-
-
+instructionFrame = tk.Frame(window, bg='#9752ff')
+instructionLabel = tk.Label(instructionFrame, text="Commands:\n/sers - Lists users that are available to play")
+instructionLabel.grid(row=1, column=3)
 
 def connect():
     global client
-    nameFrame.grid_forget()
-    chatFrame.grid(row=1, column=0)
-    usersFrame.grid(row=1,column=3)
     connect_to_server()
-    send_mssage_to_server(entName.get())
+    chatFrame.grid(row=1, column=3)
+    instructionFrame.grid(row=1, column=4, padx=10)
 
 
 
@@ -116,12 +69,19 @@ def receive_message_from_server(sck):
         from_server = sck.recv(4096).decode("utf-8")
 
         if not from_server: break
+        # display message from server on the chat window
 
-        if "Current Users:" in from_server:
-            updateUsers(from_server)
-
+        # enable the display area and insert the text and then disable.
+        # why? Apparently, tkinter does not allow us insert into a disabled Text widget :(
+        texts = chatDisplay.get("1.0", tk.END).strip()
+        chatDisplay.config(state=tk.NORMAL)
+        if len(texts) < 1:
+            chatDisplay.insert(tk.END, from_server)
         else:
-            showInChatBox(from_server)
+            chatDisplay.insert(tk.END, "\n\n"+ from_server)
+
+        chatDisplay.config(state=tk.DISABLED)
+        chatDisplay.see(tk.END)
 
 
     sck.close()
@@ -132,16 +92,6 @@ def get_chat_message(msg):
 
     msg = msg.replace('\n', '')
     texts = chatDisplay.get("1.0", tk.END).strip()
-
-    # enable the display area and insert the text and then disable.
-    # why? Apparently, tkinter does not allow use insert into a disabled Text widget :(
-    chatDisplay.config(state=tk.NORMAL)
-    if len(texts) < 1:
-        chatDisplay.insert(tk.END, "You->" + msg, "tag_your_message") # no line
-    else:
-        chatDisplay.insert(tk.END, "\n\n" + "You->" + msg, "tag_your_message")
-
-    chatDisplay.config(state=tk.DISABLED)
 
     send_mssage_to_server(msg)
 
@@ -156,5 +106,7 @@ def send_mssage_to_server(msg):
     else:
         client.sendall((msg + "\n").encode())
         print("Sending message")
+
+connect()
 
 window.mainloop()

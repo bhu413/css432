@@ -26,16 +26,21 @@ public class ClientHandler implements Runnable {
 
 	@Override
 	public void run() {
+		boolean goIntoLoop = true;
 		try {
-			//out.println("Please Register. What would you like your username to be? If you'd like a random name please type 'give me a name'");
+			out.println("Please Register. What would you like your username to be? If you'd like a random name please type 'give me a name'");
 			name = in.readLine();
 			if (name.equalsIgnoreCase("give me a name")) {
 				name = Server.getRandomName();
 				out.println("Your name is: " + name);
-			} else {
+			} else if(name.equals("/unregister")) {
+				removeClient(this);
+				goIntoLoop = false;
+			} 
+			else {
 				out.println("That's a great username " + name + "!");
 			}
-			while (true) {
+			while (goIntoLoop) {
 				String request = "";
 				if (in.ready()) {
 					request = in.readLine();
@@ -52,10 +57,12 @@ public class ClientHandler implements Runnable {
 				}
 				else if (request.startsWith("/message")) {
 					int firstSpace = request.indexOf(' ');
-					int colon = request.indexOf(':');
-					if (firstSpace != -1) {
-						outToOther(request.substring(firstSpace + 1, colon), request.substring(colon + 1));
-					}        
+					int secondSpace = request.indexOf(' ', firstSpace + 1);
+					if (firstSpace != -1 && secondSpace != -1) {
+						outToOther(request.substring(firstSpace + 1, secondSpace), request.substring(secondSpace + 1));
+					} else {
+						out.println("bad message request");
+					}  
 				}
 				else if (request.startsWith("/users")) {
 	                listUsers();	                
@@ -101,7 +108,7 @@ public class ClientHandler implements Runnable {
 
 	private void outToAll(String msg) {
 		for (ClientHandler aClient : clients) {
-			aClient.out.println(name + ": " + msg);
+			aClient.out.println(name + " (to all): " + msg);
 		}
 	}
 
@@ -128,7 +135,9 @@ public class ClientHandler implements Runnable {
 	
 	private void outToOther(String user, String message) {
 		ClientHandler other = getClient(user);
-		other.out.println(this.name + ": " + message);
+		if (other != null) {
+			other.out.println(this.name + ": " + message);
+		}
 	}
 	
 //------------------------------Game Logic-----------------------------------	
