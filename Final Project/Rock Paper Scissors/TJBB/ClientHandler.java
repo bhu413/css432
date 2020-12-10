@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ClientHandler implements Runnable {
 	private Socket client;
@@ -72,6 +73,7 @@ public class ClientHandler implements Runnable {
 					int firstSpace = request.indexOf(' ');
 					String otherPlayerId = request.substring(firstSpace + 1);
 					if (firstSpace != -1 && exists(otherPlayerId) && !getClient(otherPlayerId).inGame) { //run game logic to whoever was challenged
+						this.inGame = false;
 						out.println("Attempting to join...");
 						ClientHandler otherPlayer = getClient(otherPlayerId);
 						boolean challengeAccepted = this.challenge(otherPlayer);
@@ -91,6 +93,8 @@ public class ClientHandler implements Runnable {
 					this.inGame = true;
 				}else if (request.startsWith("/score")) {
 					out.println(this.score);
+				}else if (request.startsWith("/leaderboard")) {
+					out.println(leaderboard());
 				}
 			}
 		} catch (IOException e) {
@@ -274,6 +278,38 @@ public class ClientHandler implements Runnable {
 		return winner;
 	}
 //------------------------------End Game Logic-------------------------------
+	
+//------------------------------leaderboard----------------------------------
+	public String leaderboard() {
+//		ArrayList <ClientHandler> temp = new ArrayList<ClientHandler>(clients.size());
+		ArrayList <Integer> scores = new ArrayList<Integer>(clients.size());
+		int score;
+		for(int i = 0; i < scores.size(); i++) {
+		    score = clients.get(i).score;
+		    scores.add(score, i);
+		}
+		
+		Collections.sort(scores);
+		Collections.reverse(scores);
+		
+		String[] topScores = matchScores(scores.get(0), scores.get(1), scores.get(2), scores.get(3), scores.get(4));
+		
+		return topScores[0] + "    " + scores.get(0) + "\n" + topScores[1] + "    " + scores.get(1) + "\n" + topScores[2] + "    " + scores.get(2) + "\n"
+				+ topScores[3] + "    " + scores.get(3) + "\n" + topScores[4] + "    " + scores.get(4) + "\n";
+	}
+	
+	public String[] matchScores(int first, int second, int third, int fourth, int fifth) {
+		String[] highScores = new String[5];
+		for(ClientHandler aClient : clients) {
+			if (aClient.score == first) highScores[0] = aClient.getName();
+			if (aClient.score == second) highScores[1] = aClient.getName();
+			if (aClient.score == third) highScores[2] = aClient.getName();
+			if (aClient.score == fourth) highScores[3] = aClient.getName();
+			if (aClient.score == fifth) highScores[4] = aClient.getName();
+		}
+		
+		return highScores;
+	}
 
 	private boolean exists(String user) {
 		boolean doesExist = false;
