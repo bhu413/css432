@@ -300,6 +300,7 @@ public class ClientHandler implements Runnable {
 	
 	public String[] matchScores(int first, int second, int third, int fourth, int fifth) {
 		String[] highScores = new String[5];
+		for(int i = 0; i < highScores.length; i++) {highScores[i] = "";}
 		for(ClientHandler aClient : clients) {
 			if (aClient.score == first) highScores[0] = aClient.getName();
 			if (aClient.score == second) highScores[1] = aClient.getName();
