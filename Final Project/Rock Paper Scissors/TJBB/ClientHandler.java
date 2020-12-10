@@ -13,7 +13,8 @@ public class ClientHandler implements Runnable {
 	private PrintWriter out;
 	private ArrayList<ClientHandler> clients;
 	private String name = "";
-	public boolean inGame = false;
+	public boolean inGame = true;
+	public int score = 0;
 	String[] answers = { "rock", "r", "paper", "p", "scissors", "s" };
 
 	public ClientHandler(Socket clientSocket, ArrayList<ClientHandler> clients) throws IOException {
@@ -64,6 +65,7 @@ public class ClientHandler implements Runnable {
 					int firstSpace = request.indexOf(' ');
 					String otherPlayerId = request.substring(firstSpace + 1);
 					if (firstSpace != -1 && exists(otherPlayerId) && !getClient(otherPlayerId).inGame) { //run game logic to whoever was challenged
+						this.inGame = false;
 						ClientHandler otherPlayer = getClient(otherPlayerId);
 						outToBoth(this, otherPlayer, "you guys ready");
 						boolean challengeAccepted = this.challenge(otherPlayer);
@@ -77,6 +79,12 @@ public class ClientHandler implements Runnable {
 					} else {
 						out.println(otherPlayerId + " does not exist or is in a game.");	
 					}
+				}else if (request.startsWith("/creategame")) {
+					this.inGame = false;
+				}else if (request.startsWith("/unavailable")) {
+					this.inGame = true;
+				}else if (request.startsWith("/score")) {
+					out.println(this.score);
 				}
 			}
 		} catch (IOException e) {
@@ -133,7 +141,10 @@ public class ClientHandler implements Runnable {
 		this.out.println("Do you accept? y/n");
 		response = in.readLine();
 		
-		if(response.equalsIgnoreCase("y")) this.inGame = true;
+		if(response.equalsIgnoreCase("y")) {
+			this.inGame = true;
+			this.out.println("Waiting for " + user + " choice...");
+		}
 		
 		return response.equalsIgnoreCase("y");
 	}
@@ -172,9 +183,19 @@ public class ClientHandler implements Runnable {
 		} else if (gamePlay(p1Choice, p2Choice) == 1) {
 			outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
 			outToBoth(p1, p2, p1.name + " wins!\nGame Over");
-		}else {
+			p1.score++;
+		} else if(gamePlay(p1Choice, p2Choice) == 2) {
 			outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
 			outToBoth(p1, p2, p2.name + " wins!\nGame Over");
+			p2.score++;
+		}else if(gamePlay(p1Choice, p2Choice) == 3){
+			p1.out.println(p2.name + " exited the game\n" + p1.name + " wins!\nGame Over");
+			p1.score++;
+		} else if(gamePlay(p1Choice, p2Choice) == 4){
+			p2.out.println(p1.name + " exited the game\n" + p2.name + " wins!\nGame Over");
+			p2.score++;
+		}else {
+			outToBoth(p1, p2, "Error occured!\nGame Dropped");
 		}
 	}
 	
@@ -215,7 +236,13 @@ public class ClientHandler implements Runnable {
 				winner = 2;
 				return winner;
 			}
-		} else {
+		} else if(p2Choice.equalsIgnoreCase("/q")){
+			winner = 3;
+			return winner;
+		}else if(p1Choice.equalsIgnoreCase("/q")){
+			winner = 4;
+			return winner;
+		}else {
 			winner = 0;
 			return winner;
 		}
