@@ -2,11 +2,11 @@ import tkinter as tk
 from tkinter import messagebox
 import socket
 import threading
-from tkinter.constants import BOTH
+from tkinter.constants import BOTH, LEFT
 import time
 
 window = tk.Tk()
-window.geometry("600x800")
+window.geometry("1000x400")
 window.title("Rock Paper Scissors")
 window.configure(bg='#4c32a8')
 
@@ -25,17 +25,16 @@ window.protocol("WM_DELETE_WINDOW", on_closing)
 
 
 chatFrame = tk.Frame(window, bg='#9752ff')
-chatDisplay = tk.Text(chatFrame, height=40, width=40)
+chatDisplay = tk.Text(chatFrame, height=20, width=80)
 chatDisplay.grid(row = 0, column = 1, pady = 2)
-chatInputBox = tk.Text(chatFrame, height=2, width=40)
+chatInputBox = tk.Text(chatFrame, height=2, width=80)
 chatInputBox.grid(row = 2, column = 1, pady = 2)
 chatInputBox.config(highlightbackground="grey", state="disabled")
 chatInputBox.bind("<Return>", (lambda event: get_chat_message(chatInputBox.get("1.0", tk.END))))
 
 instructionFrame = tk.Frame(window, bg='#9752ff')
-commands = """Commands:\n/users - Lists users that are available to play\n
-                """
-instructionLabel = tk.Label(instructionFrame, text=commands)
+commands = "Commands:\n/games - Lists joinable users\n/creategame - creates a joinable game\n/join <user> - requests to join game of specified user\n/message <user> <message> - sends a message to specified user\n/all <message> sends message to all players (pls refrain from using)\n\nTo exit the program, simply close the window"
+instructionLabel = tk.Label(instructionFrame, text=commands, justify=LEFT)
 instructionLabel.grid(row=1, column=3)
 
 def connect():

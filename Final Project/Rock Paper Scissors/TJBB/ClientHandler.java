@@ -72,7 +72,6 @@ public class ClientHandler implements Runnable {
 					int firstSpace = request.indexOf(' ');
 					String otherPlayerId = request.substring(firstSpace + 1);
 					if (firstSpace != -1 && exists(otherPlayerId) && !getClient(otherPlayerId).inGame) { //run game logic to whoever was challenged
-						this.inGame = false;
 						out.println("Attempting to join...");
 						ClientHandler otherPlayer = getClient(otherPlayerId);
 						boolean challengeAccepted = this.challenge(otherPlayer);
