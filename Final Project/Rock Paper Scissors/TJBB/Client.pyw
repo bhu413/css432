@@ -33,7 +33,9 @@ chatInputBox.config(highlightbackground="grey", state="disabled")
 chatInputBox.bind("<Return>", (lambda event: get_chat_message(chatInputBox.get("1.0", tk.END))))
 
 instructionFrame = tk.Frame(window, bg='#9752ff')
-instructionLabel = tk.Label(instructionFrame, text="Commands:\n/sers - Lists users that are available to play")
+commands = """Commands:\n/users - Lists users that are available to play\n
+                """
+instructionLabel = tk.Label(instructionFrame, text=commands)
 instructionLabel.grid(row=1, column=3)
 
 def connect():
@@ -61,7 +63,7 @@ def connect_to_server():
         # do not block the main thread :)
         threading._start_new_thread(receive_message_from_server, (client,))
     except Exception as e:
-        tk.messagebox.showerror(title="ERROR!!!", message="Cannot connect to host: " + HOST_ADDR + " on port: " + str(HOST_PORT) + " Server may be Unavailable. Try again later\n" + str(e))
+        tk.messagebox.showerror(title="ERROR!!!", message="Cannot connect to host: " + HOST_ADDR + " on port: " + str(HOST_PORT) + " Server may be Unavailable. Try again later\n" + str(e), command = window.destroy())
 
 
 def receive_message_from_server(sck):

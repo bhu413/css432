@@ -15,7 +15,7 @@ public class ClientHandler implements Runnable {
 	private String name = "";
 	public boolean inGame = true;
 	public int score = 0;
-	String[] answers = { "rock", "r", "paper", "p", "scissors", "s" };
+	String[] answers = { "rock", "r", "paper", "p", "scissors", "s" , "/unregister", "/q"};
 
 	public ClientHandler(Socket clientSocket, ArrayList<ClientHandler> clients) throws IOException {
 		this.client = clientSocket;
@@ -28,7 +28,7 @@ public class ClientHandler implements Runnable {
 	public void run() {
 		boolean goIntoLoop = true;
 		try {
-			out.println("Please Register. What would you like your username to be? If you'd like a random name please type 'give me a name'");
+			out.println("Please Register. What would you like your username to be?");
 			name = in.readLine();
 			if (name.equalsIgnoreCase("give me a name")) {
 				name = Server.getRandomName();
@@ -64,19 +64,18 @@ public class ClientHandler implements Runnable {
 						out.println("bad message request");
 					}  
 				}
-				else if (request.startsWith("/users")) {
+				else if (request.startsWith("/games")) {
 	                listUsers();	                
 				}
 				
-				else if (request.startsWith("/challenge")) {
+				else if (request.startsWith("/join")) {
 					int firstSpace = request.indexOf(' ');
 					String otherPlayerId = request.substring(firstSpace + 1);
 					if (firstSpace != -1 && exists(otherPlayerId) && !getClient(otherPlayerId).inGame) { //run game logic to whoever was challenged
 						this.inGame = false;
+						out.println("Attempting to join...");
 						ClientHandler otherPlayer = getClient(otherPlayerId);
-						outToBoth(this, otherPlayer, "you guys ready");
 						boolean challengeAccepted = this.challenge(otherPlayer);
-						out.println(challengeAccepted); //TEST
 						if(challengeAccepted) {
 							this.inGame = true;
 							player1Shoot(otherPlayer);
@@ -88,6 +87,7 @@ public class ClientHandler implements Runnable {
 					}
 				}else if (request.startsWith("/creategame")) {
 					this.inGame = false;
+					out.println("Game has been created - players can now join you");
 				}else if (request.startsWith("/unavailable")) {
 					this.inGame = true;
 				}else if (request.startsWith("/score")) {
@@ -119,11 +119,10 @@ public class ClientHandler implements Runnable {
 	
 	
 	private void listUsers() {
-        out.println("Current Users:");
+        out.println("Available Games:");
         for (ClientHandler aClient : clients) {
-            if (aClient.getName() != this.name) {
-				int inGameInt = inGame ? 1 : 0;
-				out.println(aClient.getName() + " " + inGameInt);
+            if (!aClient.getName().equals(this.name) && !aClient.inGame) {
+				out.println(aClient.getName());
             }
         }
     }
@@ -146,14 +145,17 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private boolean challengeNotification(String user) throws IOException {
+		//so they don't get challenged by 2 ppl at the same time
+		this.inGame = true;
 		String response = "";
-		this.out.println(user + " has sent a challenge.");
+		this.out.println(user + " has requested to join.");
 		this.out.println("Do you accept? y/n");
 		response = in.readLine();
 		
 		if(response.equalsIgnoreCase("y")) {
-			this.inGame = true;
 			this.out.println("Waiting for " + user + " choice...");
+		} else {
+			this.inGame = false;
 		}
 		
 		return response.equalsIgnoreCase("y");
@@ -163,12 +165,11 @@ public class ClientHandler implements Runnable {
 		out.println("Game Started!");
 		out.println("What is your choice? (rock, paper, or scissors)");
 		String p1Choice = in.readLine();
+		out.println("Waiting for other player...");
 		String p2Choice = otherPlayer.player2Shoot(this);
 
 		results(this, p1Choice, otherPlayer, p2Choice);
 		
-		this.inGame = false;
-		otherPlayer.inGame = false;
 	}
 	
 	private String player2Shoot(ClientHandler challenger) throws IOException {
@@ -182,30 +183,38 @@ public class ClientHandler implements Runnable {
 	private void results(ClientHandler p1, String p1Choice, ClientHandler p2, String p2Choice) {
 		if (!isValid(p1Choice)) {
 			outToBoth(p1, p2, p1.name + ": Invalid move! Player 2 wins by default");
-		}
-		if (!isValid(p2Choice)) {
+		} else if (!isValid(p2Choice)) {
 			outToBoth(p1, p2, p2.name + ": Invalid move! Player 1 wins by default");
-		}
-
-		if (gamePlay(p1Choice, p2Choice) == 0) {
-			outToBoth(p1, p2, p1.name + " and " + p2.name + " both played " + p1Choice);
-			outToBoth(p1, p2, "Tie!\nGame Over");
-		} else if (gamePlay(p1Choice, p2Choice) == 1) {
-			outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
-			outToBoth(p1, p2, p1.name + " wins!\nGame Over");
-			p1.score++;
-		} else if(gamePlay(p1Choice, p2Choice) == 2) {
-			outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
-			outToBoth(p1, p2, p2.name + " wins!\nGame Over");
-			p2.score++;
-		}else if(gamePlay(p1Choice, p2Choice) == 3){
-			p1.out.println(p2.name + " exited the game\n" + p1.name + " wins!\nGame Over");
-			p1.score++;
-		} else if(gamePlay(p1Choice, p2Choice) == 4){
-			p2.out.println(p1.name + " exited the game\n" + p2.name + " wins!\nGame Over");
-			p2.score++;
 		}else {
-			outToBoth(p1, p2, "Error occured!\nGame Dropped");
+			if (gamePlay(p1Choice, p2Choice) == 0) {
+				outToBoth(p1, p2, p1.name + " and " + p2.name + " both played " + p1Choice);
+				outToBoth(p1, p2, "Tie!\nGame Over");
+			} else if (gamePlay(p1Choice, p2Choice) == 1) {
+				outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
+				outToBoth(p1, p2, p1.name + " wins!\nGame Over");
+				p1.score++;
+			} else if(gamePlay(p1Choice, p2Choice) == 2) {
+				outToBoth(p1, p2, p1.name + " played " + p1Choice + "\n" + p2.name + " played " + p2Choice);
+				outToBoth(p1, p2, p2.name + " wins!\nGame Over");
+				p2.score++;
+			}else if(gamePlay(p1Choice, p2Choice) == 3){
+				p1.out.println(p2.name + " exited the game\n" + p1.name + " wins!\nGame Over");
+				p1.score++;
+			} else if(gamePlay(p1Choice, p2Choice) == 4){
+				p2.out.println(p1.name + " exited the game\n" + p2.name + " wins!\nGame Over");
+				p2.score++;
+			}else if(gamePlay(p1Choice, p2Choice) == 5){
+				p1.out.println(p2.name + " has disconnected\n" + p1.name + " wins!\nGame Over");
+				p1.score++;
+				removeClient(p2);
+			} else if(gamePlay(p1Choice, p2Choice) == 6){
+				p2.out.println(p1.name + " has disconnected\n" + p2.name + " wins!\nGame Over");
+				p2.score++;
+				removeClient(p1);
+			}
+			else {
+				outToBoth(p1, p2, "Error occured!\nGame Dropped");
+			}
 		}
 	}
 	
@@ -249,10 +258,17 @@ public class ClientHandler implements Runnable {
 		} else if(p2Choice.equalsIgnoreCase("/q")){
 			winner = 3;
 			return winner;
-		}else if(p1Choice.equalsIgnoreCase("/q")){
+		} else if(p1Choice.equalsIgnoreCase("/q")){
 			winner = 4;
 			return winner;
-		}else {
+		} else if (p2Choice.equals("/unregister")) {
+			winner = 5;
+			return winner;
+		} else if (p1Choice.equals("/unregister")) {
+			winner = 6;
+			return winner;
+		}
+		else {
 			winner = 0;
 			return winner;
 		}
