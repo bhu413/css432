@@ -33,7 +33,7 @@ chatInputBox.config(highlightbackground="grey", state="disabled")
 chatInputBox.bind("<Return>", (lambda event: get_chat_message(chatInputBox.get("1.0", tk.END))))
 
 instructionFrame = tk.Frame(window, bg='#9752ff')
-commands = "Commands:\n/games - Lists joinable users\n/creategame - creates a joinable game\n/join <user> - requests to join game of specified user\n/message <user> <message> - sends a message to specified user\n/all <message> sends message to all players (pls refrain from using)\n\nTo exit the program, simply close the window"
+commands = "Commands:\n/games - Lists joinable users\n/creategame - creates a joinable game\n/join <user> - requests to join game of specified user\n/leaderboard - shows the top 5 players with the highest score\n/message <user> <message> - sends a message to specified user\n/all <message> sends message to all players (pls refrain from using)\n\nTo exit the program, simply close the window"
 instructionLabel = tk.Label(instructionFrame, text=commands, justify=LEFT)
 instructionLabel.grid(row=1, column=3)
 
