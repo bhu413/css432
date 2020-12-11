@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 
 public class Server {
+	//random name generator is no longer used for unique names sake
 	private static String[] names = {"Ransu", "Gautstafr", "Eusebius" , "Rahman", "Rajesh", "Jeremie", "Marianela", "Orli", "Wazo", "Teodoro"};
 	private static String[] adjs = {"Decisive", "Unique", "Onerous", "Boiling", "Uppity", "Diligent", "Aback", "Abrasive", "Stormy", "Ruthless"};
     private static final int port = 5000;
