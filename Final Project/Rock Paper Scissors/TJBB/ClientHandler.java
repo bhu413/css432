@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ClientHandler implements Runnable {
+public class ClientHandler implements Runnable, Comparable {
 	private Socket client;
 	private BufferedReader in;
 	private PrintWriter out;
@@ -30,7 +30,13 @@ public class ClientHandler implements Runnable {
 		boolean goIntoLoop = true;
 		try {
 			out.println("Please Register. What would you like your username to be?");
-			name = in.readLine();
+			
+			String inputtedName = in.readLine();
+			while(exists(inputtedName)) {
+				out.println("Sorry, that name is taken. Please Try Again");
+				inputtedName = in.readLine();
+			}
+			name = inputtedName;
 			if (name.equalsIgnoreCase("give me a name")) {
 				name = Server.getRandomName();
 				out.println("Your name is: " + name);
@@ -40,6 +46,7 @@ public class ClientHandler implements Runnable {
 			} 
 			else {
 				out.println("That's a great username " + name + "!");
+				
 			}
 			while (goIntoLoop) {
 				String request = "";
@@ -94,7 +101,7 @@ public class ClientHandler implements Runnable {
 				}else if (request.startsWith("/score")) {
 					out.println(this.score);
 				}else if (request.startsWith("/leaderboard")) {
-					out.println(leaderboard());
+					leaderboard();
 				}
 			}
 		} catch (IOException e) {
@@ -280,37 +287,54 @@ public class ClientHandler implements Runnable {
 //------------------------------End Game Logic-------------------------------
 	
 //------------------------------leaderboard----------------------------------
-	public String leaderboard() {
-//		ArrayList <ClientHandler> temp = new ArrayList<ClientHandler>(clients.size());
-		ArrayList <Integer> scores = new ArrayList<Integer>(clients.size());
-		int score;
-		for(int i = 0; i < scores.size(); i++) {
-		    score = clients.get(i).score;
-		    scores.add(score, i);
+	public void leaderboard() {
+		ArrayList<ClientHandler> temp = new ArrayList<ClientHandler>();
+		temp = (ArrayList) clients.clone();
+//		ArrayList <Integer> scores = new ArrayList<Integer>();
+//		int score;
+//		for(int i = 0; i < Server.getClientcount(); i++) {
+//		    score = clients.get(i).score;
+//		    scores.add(i, score);
+//		}
+//		
+//		Collections.sort(scores);
+//		Collections.reverse(scores);
+//		
+//		
+//		ArrayList<String> topScores = new ArrayList<String>(Server.getClientcount());
+//		String[] listTop = new String[Server.getClientcount()];
+//		for(int i = 0; i < Server.getClientcount(); i++) {
+//			topScores.add(0,matchScore(scores.get(i)));
+//			listTop[i] = topScores.get(0);
+//			topScores.remove(0);
+//		}
+		
+		Collections.sort(temp);
+		Collections.reverse(temp);
+		
+		for(ClientHandler aClient : temp) {
+			out.println(aClient.name + "    " + aClient.score);
 		}
 		
-		Collections.sort(scores);
-		Collections.reverse(scores);
-		
-		String[] topScores = matchScores(scores.get(0), scores.get(1), scores.get(2), scores.get(3), scores.get(4));
-		
-		return topScores[0] + "    " + scores.get(0) + "\n" + topScores[1] + "    " + scores.get(1) + "\n" + topScores[2] + "    " + scores.get(2) + "\n"
-				+ topScores[3] + "    " + scores.get(3) + "\n" + topScores[4] + "    " + scores.get(4) + "\n";
 	}
 	
-	public String[] matchScores(int first, int second, int third, int fourth, int fifth) {
-		String[] highScores = new String[5];
-		for(int i = 0; i < highScores.length; i++) {highScores[i] = "";}
-		for(ClientHandler aClient : clients) {
-			if (aClient.score == first) highScores[0] = aClient.getName();
-			if (aClient.score == second) highScores[1] = aClient.getName();
-			if (aClient.score == third) highScores[2] = aClient.getName();
-			if (aClient.score == fourth) highScores[3] = aClient.getName();
-			if (aClient.score == fifth) highScores[4] = aClient.getName();
-		}
-		
-		return highScores;
-	}
+//	public String matchScore(int score) {
+//		String highScore = "";
+//		for(ClientHandler aClient : clients) {
+//			if (aClient.score == score) highScore = aClient.getName();
+//		}
+//		
+//		return highScore;
+//	}
+	
+//	public String printHighScores(int count, ArrayList <Integer> scores, String[] topScores) {
+//		String leaderBoard = "";
+//		for(int i = 0; i < count; i++) {
+//			leaderBoard += topScores[i] + "    " + scores.get(i) + "\n";
+//		}
+//		
+//		return leaderBoard;
+//	}
 
 	private boolean exists(String user) {
 		boolean doesExist = false;
@@ -326,6 +350,7 @@ public class ClientHandler implements Runnable {
 		return name;
 	}
 	
+	
 	public ClientHandler getClient(String user) {
 		if(exists(user)) {
 			for (ClientHandler aClient : clients) {
@@ -334,5 +359,11 @@ public class ClientHandler implements Runnable {
 	        }
 		}
 		return null;
+	}
+
+	@Override
+	public int compareTo(Object otherPlayer) {
+			ClientHandler otherGuy = (ClientHandler) otherPlayer;
+			return this.score - otherGuy.score;
 	}
 }
