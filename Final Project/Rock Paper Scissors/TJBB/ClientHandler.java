@@ -185,9 +185,9 @@ public class ClientHandler implements Runnable {
 	
 	private void results(ClientHandler p1, String p1Choice, ClientHandler p2, String p2Choice) {
 		if (!isValid(p1Choice)) {
-			outToBoth(p1, p2, p1.name + ": Invalid move! Player 2 wins by default");
+			outToBoth(p1, p2, p1.name + " made an invalid move! " + p2.name + " wins by default");
 		} else if (!isValid(p2Choice)) {
-			outToBoth(p1, p2, p2.name + ": Invalid move! Player 1 wins by default");
+			outToBoth(p1, p2, p2.name + " made an invalid move! " + p1.name + " wins by default");
 		}else {
 			if (gamePlay(p1Choice, p2Choice) == 0) {
 				outToBoth(p1, p2, p1.name + " and " + p2.name + " both played " + p1Choice);
@@ -241,7 +241,10 @@ public class ClientHandler implements Runnable {
 			} else if (p2Choice.equalsIgnoreCase(answers[4]) || p2Choice.equalsIgnoreCase(answers[5])) {
 				winner = 1;
 				return winner;
-			}
+			} else if(p2Choice.equalsIgnoreCase("/q")){
+				winner = 3;
+				return winner;
+				}
 		} else if (p1Choice.equalsIgnoreCase(answers[2]) || p1Choice.equalsIgnoreCase(answers[3])) {
 			if (p2Choice.equalsIgnoreCase(answers[0]) || p2Choice.equalsIgnoreCase(answers[1])) {
 				winner = 1;
@@ -249,7 +252,10 @@ public class ClientHandler implements Runnable {
 			} else if (p2Choice.equalsIgnoreCase(answers[4]) || p2Choice.equalsIgnoreCase(answers[5])) {
 				winner = 2;
 				return winner;
-			}
+			} else if(p2Choice.equalsIgnoreCase("/q")){
+				winner = 3;
+				return winner;
+				}
 		} else if (p1Choice.equalsIgnoreCase(answers[4]) || p1Choice.equalsIgnoreCase(answers[5])) {
 			if (p2Choice.equalsIgnoreCase(answers[2]) || p2Choice.equalsIgnoreCase(answers[3])) {
 				winner = 1;
@@ -257,13 +263,19 @@ public class ClientHandler implements Runnable {
 			} else if (p2Choice.equalsIgnoreCase(answers[0]) || p2Choice.equalsIgnoreCase(answers[1])) {
 				winner = 2;
 				return winner;
-			}
-		} else if(p2Choice.equalsIgnoreCase("/q")){
-			winner = 3;
-			return winner;
+			} else if(p2Choice.equalsIgnoreCase("/q")){
+				winner = 3;
+				return winner;
+				}
 		} else if(p1Choice.equalsIgnoreCase("/q")){
-			winner = 4;
-			return winner;
+			if(p2Choice.equalsIgnoreCase("/q"))	{
+				winner = 0;
+				return winner;
+			}
+			else{ 
+				winner = 4;
+				return winner;
+			}
 		} else if (p2Choice.equals("/unregister")) {
 			winner = 5;
 			return winner;
