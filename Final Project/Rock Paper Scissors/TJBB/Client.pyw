@@ -6,7 +6,7 @@ from tkinter.constants import BOTH, LEFT
 import time
 
 window = tk.Tk()
-window.geometry("1000x400")
+window.geometry("1000x500")
 window.title("Rock Paper Scissors")
 window.configure(bg='#4c32a8')
 
