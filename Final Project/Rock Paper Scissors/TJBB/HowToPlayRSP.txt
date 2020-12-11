@@ -9,17 +9,17 @@ To start the server, simply run python file on the machine that you would like t
 Since the current version of the client is hardcoded to attach to a specific server, you will need to change the connection ip to your server's ip addr to allow the client to connect to your server.
 
 Starting a Client:
-To start a connection with the server, run Client.java and the client will ask you to register with a username. If the username is already taken they will be asked to change their registered username. 
+To start a connection with the server, double click Client.pyw and the client will ask you to register with a username. If the username is already taken they will be asked to change their registered username. 
 If the username is found to be unique, you will then be registered within the server.
 
 After Successful Registration:
 After successfully registering with the server, you will be able to freely talk to all users in the server's chat channel, privately message other users, create a game for others to join, list available users for a game, challenge other users to a game of RPS, check the leaderboard, and unregister. Below are the respective text commands.
 
-'/all (msg)' 
-'/msg (username to msg) (msg)'
+'/all <msg>' 
+'/message <username to msg> <msg>'
 '/creategame' 
-'/listgames'
-'/challenge (username to challenge)'
+'/games'
+'/join <player to join>'
 '/leaderboard'
 '/unregister'
 
@@ -28,7 +28,7 @@ Creating a game
 Users will be able to create a game by using the function '/creategame', opening their messages to challenges. 
 
 Joining a game
-In order to join a game, you must challenge an available player. Available games are found using '/listgames'. Keep in mind, the challenged player has the right to reject your challenge / join.
+In order to join a game, you must challenge an available player. Available games are found using '/games'. Keep in mind, the challenged player has the right to reject your challenge / join.
 
 Playing the game
 Player1 will first be prompted to type "r" for rock, "p" for paper, and "s" for scissors. Then, Player2 will be prompted the same. Results will be displayed after.
