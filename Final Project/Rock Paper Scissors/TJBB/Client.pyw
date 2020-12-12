@@ -47,7 +47,7 @@ def connect():
 
 # network client
 client = None
-HOST_ADDR = "tjbb.bhu413.com"
+HOST_ADDR = "localhost"
 HOST_PORT = 5000
 
 def connect_to_server():
