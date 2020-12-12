@@ -32,7 +32,7 @@ public class ClientHandler implements Runnable, Comparable {
 			out.println("Please Register. What would you like your username to be?");
 			
 			String inputtedName = in.readLine();
-			while(exists(inputtedName)) {
+			while(nameExists(inputtedName)) {
 				out.println("Sorry, that name is taken. Please Try Again");
 				inputtedName = in.readLine();
 			}
@@ -325,7 +325,7 @@ public class ClientHandler implements Runnable, Comparable {
 		Collections.reverse(temp);
 		
 		for(ClientHandler aClient : temp) {
-			out.println(aClient.name + "    " + aClient.score);
+			out.println(aClient.name + "\t" + aClient.score);
 		}
 		
 	}
@@ -358,6 +358,15 @@ public class ClientHandler implements Runnable, Comparable {
 		return doesExist;
 	}
 	
+	private boolean nameExists(String user) {
+		boolean doesExist = false;
+		for (ClientHandler aClient : clients) {
+            if (aClient.getName().equals(user)) 
+            	doesExist = true;
+        }
+		return doesExist;
+	}
+
 	public String getName() {
 		return name;
 	}

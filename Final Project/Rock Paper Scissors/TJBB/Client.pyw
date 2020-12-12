@@ -6,7 +6,7 @@ from tkinter.constants import BOTH, LEFT
 import time
 
 window = tk.Tk()
-window.geometry("1000x500")
+window.geometry("1200x500")
 window.title("Rock Paper Scissors")
 window.configure(bg='#4c32a8')
 
@@ -76,10 +76,10 @@ def receive_message_from_server(sck):
         # why? Apparently, tkinter does not allow us insert into a disabled Text widget :(
         texts = chatDisplay.get("1.0", tk.END).strip()
         chatDisplay.config(state=tk.NORMAL)
-        if len(texts) < 1:
-            chatDisplay.insert(tk.END, from_server)
-        else:
-            chatDisplay.insert(tk.END, "\n\n"+ from_server)
+        #if len(texts) < 1:
+        chatDisplay.insert(tk.END, "\n" + from_server)
+        #else:
+            #chatDisplay.insert(tk.END, "\n\n"+ from_server)
 
         chatDisplay.config(state=tk.DISABLED)
         chatDisplay.see(tk.END)
